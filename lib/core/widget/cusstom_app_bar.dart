@@ -7,6 +7,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Color? titleColor;
   final Color? backgroundColor;
   final Color? iconColor;
+  final Widget? leading;
   const CustomAppBar({
     super.key,
     required this.title,
@@ -15,41 +16,21 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.titleColor,
     this.backgroundColor,
     this.iconColor,
+    this.leading,
   });
 
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      backgroundColor: Colors.black,
-      title: Text(title,
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          )),
-      centerTitle: true,
-      leading: onTap == null
-          ? null
-          : Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ElevatedButton(
-                onPressed: onTap,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.black,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(35),
-                  ),
-                  padding: EdgeInsets.zero,
-                  minimumSize: const Size(40, 40),
-                  elevation: 0,
-                ),
-                child: Icon(
-                  icon,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-    );
+        backgroundColor: Colors.black,
+        title: Text(title,
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            )),
+        centerTitle: true,
+        leading: onTap == null ? null : leading);
   }
 
   @override
