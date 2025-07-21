@@ -2,7 +2,6 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 import '../../../core/data/player_data.dart';
-import '../../../core/utils/App_colors.dart';
 
 class PasworChalleng extends StatefulWidget {
   const PasworChalleng({super.key});
@@ -46,225 +45,257 @@ class _PasworChallengState extends State<PasworChalleng> {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: Scaffold(
-        backgroundColor: AppColors.primaryBackground,
-        appBar: AppBar(
-          backgroundColor: AppColors.primaryBackground,
-          elevation: 0,
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back_ios, color: AppColors.primaryTextColor),
-            onPressed: () => Navigator.pop(context),
+      child: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFF232526), Color(0xFF0f2027), Color(0xFF2c5364)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
-          title: Text(
-            'اسماء لاعبين',
-            style: TextStyle(
-              color: AppColors.pureWhite,
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              fontFamily: 'Cairo',
-            ),
-          ),
-          centerTitle: true,
         ),
-        body: Column(
-          children: [
-            Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  buildTeamScoreColumn('الفريق أ', teamAScore, 'A'),
-                  buildTeamScoreColumn('الفريق ب', teamBScore, 'B'),
-                ],
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+              onPressed: () => Navigator.pop(context),
+            ),
+            title: const Text(
+              'اسماء لاعبين',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 26,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Cairo',
+                shadows: [Shadow(color: Colors.black38, blurRadius: 6)],
               ),
             ),
-            const Divider(
-              color: AppColors.darkBlue,
-              thickness: 1,
-              height: 1,
-            ),
-
-            // تم استخدام Expanded لإعطاء هذا الجزء كل المساحة المتبقية
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                // ================== بداية التعديل ==================
-                // تم تغليف الـ Column بـ SingleChildScrollView ليسمح بالتمرير
-                child: SingleChildScrollView(
-                  child: Column(
-                    // تم تغيير MainAxisAlignment لأن SingleChildScrollView يتعارض مع spaceBetween
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 500),
-                        transitionBuilder: (child, animation) {
-                          return FadeTransition(
-                            opacity: animation,
-                            child:
-                                ScaleTransition(scale: animation, child: child),
-                          );
-                        },
-                        child: randomPlayer != null
-                            ? _buildPlayerCard(randomPlayer!)
-                            : _buildInitialView(),
-                      ),
-
-                      // إضافة مسافة يدوية بين البطاقة والزر
-                      const SizedBox(height: 20),
-
-                      SizedBox(
-                        width: double.infinity,
-                        height: 55,
-                        child: ElevatedButton.icon(
+            centerTitle: true,
+          ),
+          body: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 16.0, vertical: 10.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    buildTeamScoreColumn('الفريق أ', teamAScore, 'A'),
+                    buildTeamScoreColumn('الفريق ب', teamBScore, 'B'),
+                  ],
+                ),
+              ),
+              const Divider(
+                color: Colors.white24,
+                thickness: 1,
+                height: 1,
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 500),
+                          transitionBuilder: (child, animation) {
+                            return FadeTransition(
+                              opacity: animation,
+                              child: ScaleTransition(
+                                  scale: animation, child: child),
+                            );
+                          },
+                          child: randomPlayer != null
+                              ? _buildPlayerCard(randomPlayer!)
+                              : _buildInitialView(),
+                        ),
+                        const SizedBox(height: 20),
+                        ElevatedButton.icon(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.glowBlue,
-                            foregroundColor: AppColors.pureWhite,
+                            backgroundColor: const Color(0xFF36D1C4),
+                            foregroundColor: Colors.white,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                            elevation: 8,
-                            shadowColor: AppColors.glowBlue.withOpacity(0.5),
+                                borderRadius: BorderRadius.circular(30)),
+                            elevation: 10,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 32, vertical: 18),
                           ),
                           onPressed: getPlayerRandom,
-                          icon: const Icon(Icons.shuffle, size: 24),
-                          label: Text(
-                            randomPlayer == null ? 'اعرض لاعب' : 'لاعب جديد',
-                            style: const TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: 'Cairo',
-                            ),
+                          icon: const Icon(Icons.person_search, size: 28),
+                          label: const Text(
+                            'اعرض لاعب',
+                            style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'Cairo'),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-                // ================== نهاية التعديل ==================
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildInitialView() {
-    // ... الكود هنا يبقى كما هو
+  Widget buildTeamScoreColumn(String teamName, int teamScore, String team) {
     return Column(
-      key: const ValueKey('initial'),
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(Icons.person_search, size: 120, color: AppColors.darkBlue),
-        const SizedBox(height: 20),
-        const Text(
-          'هل أنت مستعد للتحدي؟',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: AppColors.primaryTextColor,
-            fontFamily: 'Cairo',
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              team == 'A' ? Icons.sports_esports : Icons.sports_soccer,
+              color: team == 'A'
+                  ? const Color(0xFF36D1C4)
+                  : const Color(0xFF5B86E5),
+              size: 28,
+              shadows: [const Shadow(color: Colors.black26, blurRadius: 4)],
+            ),
+            const SizedBox(width: 6),
+            Text(
+              teamName,
+              style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  fontFamily: 'Cairo',
+                  shadows: [Shadow(color: Colors.black38, blurRadius: 6)]),
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.12),
+            borderRadius: BorderRadius.circular(18),
+            boxShadow: [
+              BoxShadow(
+                color: team == 'A'
+                    ? const Color(0xFF36D1C4).withOpacity(0.18)
+                    : const Color(0xFF5B86E5).withOpacity(0.18),
+                blurRadius: 12,
+                spreadRadius: 2,
+              ),
+            ],
+          ),
+          child: Text(
+            '$teamScore',
+            style: TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.bold,
+                color: team == 'A'
+                    ? const Color(0xFF36D1C4)
+                    : const Color(0xFF5B86E5),
+                fontFamily: 'Cairo',
+                shadows: [const Shadow(color: Colors.black26, blurRadius: 4)]),
           ),
         ),
-        const SizedBox(height: 10),
-        Text(
-          'اضغط على زر "اعرض لاعب" لبدء اللعبة',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 18,
-            color: AppColors.secondaryTextColor,
-            fontFamily: 'Cairo',
-          ),
+        Row(
+          children: [
+            IconButton(
+              onPressed: () => increaseTeamScore(team),
+              icon: const Icon(Icons.add_circle_outline,
+                  color: Colors.greenAccent, size: 28),
+              splashRadius: 22,
+            ),
+            IconButton(
+              onPressed: () => decreaseTeamScore(team),
+              icon: const Icon(Icons.remove_circle_outline,
+                  color: Colors.redAccent, size: 28),
+              splashRadius: 22,
+            ),
+          ],
         ),
       ],
     );
   }
 
   Widget _buildPlayerCard(PlayerModel player) {
-    // ... الكود هنا يبقى كما هو
     return Container(
       key: ValueKey(player.name),
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(24.0),
+      margin: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        gradient: LinearGradient(
-          colors: [
-            AppColors.darkBlue.withOpacity(0.8),
-            AppColors.primaryBackground,
-          ],
+        borderRadius: BorderRadius.circular(28),
+        gradient: const LinearGradient(
+          colors: [Color(0xFF232526), Color(0xFF2c5364)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.pureBlack.withOpacity(0.4),
-            blurRadius: 15,
+            color: Colors.black.withOpacity(0.22),
+            blurRadius: 18,
             spreadRadius: 2,
+            offset: const Offset(0, 8),
           )
         ],
       ),
       child: Column(
-        // تم حذف SingleChildScrollView من هنا لأن التمرير أصبح في الأعلى
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
+            width: 120,
+            height: 120,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(15),
+              shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.glowBlue.withOpacity(0.3),
-                  blurRadius: 12,
-                  spreadRadius: 1,
+                  color: Colors.blueAccent.withOpacity(0.18),
+                  blurRadius: 30,
+                  spreadRadius: 6,
                 ),
               ],
             ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(15.0),
+            child: ClipOval(
               child: Image.asset(
                 player.image,
-                width: 180,
-                height: 250,
-                fit: BoxFit.cover,
+                fit: BoxFit.contain,
+                width: 120,
+                height: 120,
               ),
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 18),
           Text(
             player.name,
             textAlign: TextAlign.center,
             style: const TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-              color: AppColors.pureWhite,
-              fontFamily: 'Cairo',
+                fontSize: 32,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+                fontFamily: 'Cairo',
+                shadows: [Shadow(color: Colors.black54, blurRadius: 8)]),
+          ),
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.12),
+              borderRadius: BorderRadius.circular(18),
+            ),
+            child: Text(
+              player.position,
+              style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF36D1C4),
+                  fontFamily: 'Cairo'),
             ),
           ),
-          Text(
-            '(${player.position})',
-            style: TextStyle(
-              fontSize: 18,
-              color: AppColors.secondaryTextColor,
-              fontFamily: 'Cairo',
-            ),
-          ),
-          const Divider(
-            color: AppColors.darkBlue,
-            thickness: 1,
-            height: 25,
-            indent: 40,
-            endIndent: 40,
-          ),
-          const Text(
-            'الأندية التي لعب لها',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: AppColors.primaryTextColor,
-              fontFamily: 'Cairo',
-            ),
-          ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 18),
           Wrap(
             spacing: 8.0,
             runSpacing: 8.0,
@@ -274,12 +305,12 @@ class _PasworChallengState extends State<PasworChalleng> {
                 label: Text(
                   club,
                   style: const TextStyle(
-                    color: AppColors.pureWhite,
+                    color: Colors.white,
                     fontWeight: FontWeight.bold,
                     fontFamily: 'Cairo',
                   ),
                 ),
-                backgroundColor: AppColors.glowBlue.withOpacity(0.8),
+                backgroundColor: const Color(0xFF36D1C4).withOpacity(0.8),
                 padding:
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               );
@@ -290,40 +321,38 @@ class _PasworChallengState extends State<PasworChalleng> {
     );
   }
 
-  Column buildTeamScoreColumn(String teamName, int teamScore, String team) {
-    // ... الكود هنا يبقى كما هو
+  Widget _buildInitialView() {
     return Column(
-      mainAxisSize: MainAxisSize.min,
+      key: const ValueKey('initial'),
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text(
-          teamName,
-          style: const TextStyle(
-            fontSize: 24,
+        const Icon(Icons.person_search,
+            size: 120,
+            color: Colors.white70,
+            shadows: [Shadow(color: Colors.black45, blurRadius: 12)]),
+        const SizedBox(height: 20),
+        const Text(
+          'هل أنت مستعد للتحدي؟',
+          style: TextStyle(
+            fontSize: 26,
             fontWeight: FontWeight.bold,
-            color: AppColors.primaryTextColor,
+            color: Colors.white,
             fontFamily: 'Cairo',
+            shadows: [
+              Shadow(color: Colors.black54, blurRadius: 8, offset: Offset(0, 2))
+            ],
           ),
         ),
-        Text(
-          '$teamScore',
-          style: const TextStyle(
-            fontSize: 36,
-            fontWeight: FontWeight.bold,
-            color: AppColors.glowBlue,
+        const SizedBox(height: 10),
+        const Text(
+          'اضغط على زر "اعرض لاعب" لبدء اللعبة',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 20,
+            color: Colors.white70,
+            fontFamily: 'Cairo',
+            shadows: [Shadow(color: Colors.black38, blurRadius: 6)],
           ),
-        ),
-        Row(
-          children: [
-            IconButton(
-              onPressed: () => increaseTeamScore(team),
-              icon: const Icon(Icons.add_circle, color: AppColors.successColor),
-            ),
-            IconButton(
-              onPressed: () => decreaseTeamScore(team),
-              icon:
-                  const Icon(Icons.remove_circle, color: AppColors.errorColor),
-            ),
-          ],
         ),
       ],
     );

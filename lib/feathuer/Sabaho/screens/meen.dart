@@ -56,85 +56,94 @@ class _MeenPageState extends State<MeenPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.primaryBackground,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
-        backgroundColor: AppColors.primaryBackground,
-        elevation: 0,
+        backgroundColor: Colors.transparent,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios, color: AppColors.primaryTextColor),
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
           'مين في الصورة',
           style: TextStyle(
-            color: AppColors.pureWhite,
-            fontSize: 22,
+            color: Colors.white,
+            fontSize: 26,
             fontWeight: FontWeight.bold,
             fontFamily: 'Cairo',
+            shadows: [Shadow(color: Colors.black38, blurRadius: 6)],
           ),
         ),
         centerTitle: true,
       ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // Page indicators
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(
-              _displayedImages.length,
-              (index) => _buildPageIndicator(index == _currentPageIndex),
-            ),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFF232526), Color(0xFF0f2027), Color(0xFF2c5364)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
-          const SizedBox(height: 20),
-          // Page viewer for images
-          AspectRatio(
-            aspectRatio: 2 / 1, // Aspect ratio for images (width/height)
-            child: PageView.builder(
-              controller: _pageController,
-              itemCount: _displayedImages.length,
-              itemBuilder: (context, index) {
-                final question = _displayedImages[index];
-                final isFlipped = _flippedCardIndexes.contains(index);
-                return Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 10),
-                  child: _buildFlippableImageCard(
-                      context, question, isFlipped, index), // Pass context
-                );
-              },
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(
+                _displayedImages.length,
+                (index) => _buildPageIndicator(index == _currentPageIndex),
+              ),
             ),
-          ),
-          const SizedBox(height: 20),
-          // Instructional text
-          const Text(
-            'انقر على الصورة لإظهار الإجابة',
-            style: TextStyle(
-              color: AppColors.secondaryTextColor,
-              fontSize: 16,
-              fontFamily: 'Cairo',
+            const SizedBox(height: 20),
+            AspectRatio(
+              aspectRatio: 2 / 1,
+              child: PageView.builder(
+                controller: _pageController,
+                itemCount: _displayedImages.length,
+                itemBuilder: (context, index) {
+                  final question = _displayedImages[index];
+                  final isFlipped = _flippedCardIndexes.contains(index);
+                  return Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 10),
+                    child: _buildFlippableImageCard(
+                        context, question, isFlipped, index),
+                  );
+                },
+              ),
             ),
-          ),
-          const SizedBox(height: 15),
-        ],
+            const SizedBox(height: 20),
+            const Text(
+              'انقر على الصورة لإظهار الإجابة',
+              style: TextStyle(
+                color: Colors.white70,
+                fontSize: 18,
+                fontFamily: 'Cairo',
+                fontWeight: FontWeight.bold,
+                shadows: [Shadow(color: Colors.black26, blurRadius: 4)],
+              ),
+            ),
+            const SizedBox(height: 15),
+          ],
+        ),
       ),
-      // "New Round" button
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: _shuffleQuestions, // On press, shuffle questions
-        backgroundColor: AppColors.glowBlue,
-        icon: const Icon(Icons.refresh, color: AppColors.pureWhite),
+        onPressed: _shuffleQuestions,
+        backgroundColor: const Color(0xFF36D1C4),
+        icon: const Icon(Icons.refresh, color: Colors.white),
         label: const Text(
           'جولة جديدة',
           style: TextStyle(
-            color: AppColors.pureWhite,
+            color: Colors.white,
             fontWeight: FontWeight.bold,
             fontFamily: 'Cairo',
+            fontSize: 20,
           ),
         ),
       ),
     );
   }
 
-  // Function to build page indicators
   Widget _buildPageIndicator(bool isActive) {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
@@ -142,34 +151,33 @@ class _MeenPageState extends State<MeenPage> {
       height: 12,
       width: isActive ? 24 : 12,
       decoration: BoxDecoration(
-        color: isActive ? AppColors.glowBlue : AppColors.darkBlue,
+        color: isActive ? const Color(0xFF36D1C4) : Colors.white24,
         borderRadius: BorderRadius.circular(12),
       ),
     );
   }
 
-  // Function to build a flippable image card
   Widget _buildFlippableImageCard(
       BuildContext context, QuestionModel question, bool isFlipped, int index) {
     return GestureDetector(
       onTap: () {
-        HapticFeedback.mediumImpact(); // Light vibration on tap
+        HapticFeedback.mediumImpact();
         setState(() {
           if (isFlipped) {
-            _flippedCardIndexes.remove(index); // Remove card from flipped set
+            _flippedCardIndexes.remove(index);
           } else {
-            _flippedCardIndexes.add(index); // Add card to flipped set
+            _flippedCardIndexes.add(index);
           }
         });
       },
       child: Card(
         clipBehavior: Clip.antiAlias,
-        color: AppColors.darkBlue,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        elevation: 10,
-        shadowColor: AppColors.glowBlue.withOpacity(0.4),
+        color: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        elevation: 16,
+        shadowColor: const Color(0xFF36D1C4).withOpacity(0.25),
         child: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 600), // Animation duration
+          duration: const Duration(milliseconds: 600),
           transitionBuilder: (child, animation) {
             final rotateAnim = Tween(begin: pi, end: 0.0).animate(animation);
             return AnimatedBuilder(
@@ -189,35 +197,77 @@ class _MeenPageState extends State<MeenPage> {
             );
           },
           child: isFlipped
-              ? _buildCardFace(
-                  'الإجابة', question.answer, isFlipped) // Display answer
-              : _buildCardImage(context, question.imageUrl,
-                  isFlipped), // Display image (with fullscreen button)
+              ? _buildCardFace('الإجابة', question.answer, isFlipped)
+              : _buildCardImage(context, question.imageUrl, isFlipped),
         ),
       ),
     );
   }
 
-  // Function to build the image display interface (front of the card)
+  Widget _buildCardFace(String title, String answer, bool isFlipped) {
+    final players = answer
+        .split('\n')
+        .map((e) => e.trim())
+        .where((e) => e.isNotEmpty)
+        .toList();
+    return Container(
+      key: ValueKey(isFlipped),
+      color: const Color(0xFF232526),
+      padding: const EdgeInsets.all(18),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              color: Color(0xFF36D1C4),
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'Cairo',
+            ),
+          ),
+          const SizedBox(height: 16),
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: players
+                    .map((name) => Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 3.0),
+                          child: Text(
+                            name,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontFamily: 'Cairo',
+                            ),
+                          ),
+                        ))
+                    .toList(),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildCardImage(
       BuildContext context, String imageUrl, bool isFlipped) {
     return Stack(
-      key: ValueKey(isFlipped), // Key to track state in AnimatedSwitcher
+      key: ValueKey(!isFlipped),
       children: [
         Positioned.fill(
           child: Image.asset(
             imageUrl,
-            fit: BoxFit
-                .cover, // Fill available space while maintaining aspect ratio
+            fit: BoxFit.cover,
           ),
         ),
-        // Fullscreen button
         Positioned(
           top: 8,
           right: 8,
           child: IconButton(
-            icon: Icon(Icons.fullscreen,
-                color: AppColors.pureWhite.withOpacity(0.8)),
+            icon: Icon(Icons.fullscreen, color: Colors.white.withOpacity(0.8)),
             onPressed: () {
               Navigator.push(
                 context,
@@ -229,42 +279,6 @@ class _MeenPageState extends State<MeenPage> {
           ),
         ),
       ],
-    );
-  }
-
-  // Function to build the answer display interface (back of the card)
-  Widget _buildCardFace(String title, String content, bool isFlipped) {
-    return Container(
-      key: ValueKey(isFlipped), // Key to track state in AnimatedSwitcher
-      padding: const EdgeInsets.all(20),
-      child: Center(
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.secondaryTextColor,
-                    fontFamily: 'Cairo'),
-              ),
-              const SizedBox(height: 15),
-              Text(
-                content,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.successColor,
-                    height: 1.5,
-                    fontFamily: 'Cairo'),
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }
@@ -280,15 +294,19 @@ class FullScreenImagePage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.black, // Black background for fullscreen
       body: GestureDetector(
-        onTap: () {
-          Navigator.pop(context); // On tap, return to the previous page
-        },
+        onTap: () =>
+            Navigator.pop(context), // On tap, return to the previous page
         child: Center(
           child: Hero(
             tag: imageUrl, // Use Hero animation for a smooth transition
-            child: Image.asset(
-              imageUrl,
-              fit: BoxFit.contain, // Display the entire image within the screen
+            child: InteractiveViewer(
+              minScale: 0.7,
+              maxScale: 4.0,
+              child: Image.asset(
+                imageUrl,
+                fit: BoxFit
+                    .contain, // Display the entire image within the screen
+              ),
             ),
           ),
         ),

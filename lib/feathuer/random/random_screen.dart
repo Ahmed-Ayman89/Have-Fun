@@ -186,82 +186,255 @@ class _QuizsceenState extends State<Quizsceen> {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: Scaffold(
-        backgroundColor: AppColors.primaryBackground,
-        appBar: AppBar(
-          backgroundColor: AppColors.primaryBackground,
-          elevation: 0,
-          leading: IconButton(
-            icon: Icon(
-              Icons.arrow_back_ios,
-              color: AppColors.primaryTextColor,
-            ),
-            onPressed: () {
-              Navigator.pop(context);
-            },
+      child: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFF232526), Color(0xFF0f2027), Color(0xFF2c5364)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
-          title: Text(
-            'أسئلة دينيه',
-            style: TextStyle(
-              color: AppColors.pureWhite,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          centerTitle: true,
         ),
-        body: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  buildTeamScoreColumn('فريق أ', teamAScore, 'A'),
-                  buildTeamScoreColumn('فريق ب', teamBScore, 'B'),
-                ],
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            leading: IconButton(
+              icon: const Icon(
+                Icons.arrow_back_ios,
+                color: Colors.white,
               ),
-              const SizedBox(height: 20),
-              Text(
-                questions[currentQuestionIndex]['question'],
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.primaryTextColor,
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+            title: const Text(
+              'أسئلة عشوائية',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 26,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Cairo',
+                letterSpacing: 0.5,
+              ),
+            ),
+            centerTitle: true,
+          ),
+          body: Center(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(18.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const SizedBox(height: 18),
+                    // Fun icon/logo
+                    Container(
+                      width: 90,
+                      height: 90,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.blueAccent.withOpacity(0.18),
+                            blurRadius: 30,
+                            spreadRadius: 6,
+                          ),
+                        ],
+                      ),
+                      child: ClipOval(
+                        child: Image.asset(
+                          'assets/main_logo.jpeg',
+                          fit: BoxFit.cover,
+                          width: 80,
+                          height: 80,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 18),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        // Modern team score card
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 12, horizontal: 22),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.10),
+                            borderRadius: BorderRadius.circular(18),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.10),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.group,
+                                  color: Colors.cyanAccent, size: 32),
+                              const SizedBox(height: 4),
+                              Text(
+                                'فريق أ',
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                  fontFamily: 'Cairo',
+                                ),
+                              ),
+                              Text(
+                                '$teamAScore',
+                                style: const TextStyle(
+                                  fontSize: 32,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.cyanAccent,
+                                  fontFamily: 'Cairo',
+                                ),
+                              ),
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    onPressed: () => increaseTeamScore('A'),
+                                    icon: const Icon(Icons.add_circle,
+                                        color: Colors.greenAccent, size: 26),
+                                  ),
+                                  IconButton(
+                                    onPressed: () => decreaseTeamScore('A'),
+                                    icon: const Icon(Icons.remove_circle,
+                                        color: Colors.redAccent, size: 26),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 12, horizontal: 22),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.10),
+                            borderRadius: BorderRadius.circular(18),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.10),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.group,
+                                  color: Colors.amberAccent, size: 32),
+                              const SizedBox(height: 4),
+                              Text(
+                                'فريق ب',
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                  fontFamily: 'Cairo',
+                                ),
+                              ),
+                              Text(
+                                '$teamBScore',
+                                style: const TextStyle(
+                                  fontSize: 32,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.amberAccent,
+                                  fontFamily: 'Cairo',
+                                ),
+                              ),
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    onPressed: () => increaseTeamScore('B'),
+                                    icon: const Icon(Icons.add_circle,
+                                        color: Colors.greenAccent, size: 26),
+                                  ),
+                                  IconButton(
+                                    onPressed: () => decreaseTeamScore('B'),
+                                    icon: const Icon(Icons.remove_circle,
+                                        color: Colors.redAccent, size: 26),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 30),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 18, horizontal: 12),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.13),
+                        borderRadius: BorderRadius.circular(18),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.10),
+                            blurRadius: 8,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Text(
+                        questions[currentQuestionIndex]['question'],
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          fontFamily: 'Cairo',
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 36),
+                    ...questions[currentQuestionIndex]['options'].map((option) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 10.0),
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            minimumSize: const Size(double.infinity, 60),
+                            backgroundColor: getButtonColor(option),
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(35),
+                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 20),
+                            shadowColor:
+                                getButtonColor(option) == AppColors.darkBlue
+                                    ? AppColors.glowBlue.withOpacity(0.5)
+                                    : getButtonColor(option).withOpacity(0.7),
+                            elevation: 14,
+                          ),
+                          onPressed: () => checkAnswer(option),
+                          child: Text(
+                            option,
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                              fontFamily: 'Cairo',
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                    const SizedBox(height: 30),
+                  ],
                 ),
               ),
-              const SizedBox(height: 40),
-              ...questions[currentQuestionIndex]['options'].map((option) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: getButtonColor(option),
-                      foregroundColor: AppColors.pureWhite,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(35),
-                      ),
-                      padding: const EdgeInsets.symmetric(vertical: 15),
-                      shadowColor: getButtonColor(option) == AppColors.darkBlue
-                          ? AppColors.glowBlue.withOpacity(0.5)
-                          : getButtonColor(option).withOpacity(0.7),
-                      elevation: 10,
-                    ),
-                    onPressed: () => checkAnswer(option),
-                    child: Text(
-                      option,
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.pureWhite,
-                      ),
-                    ),
-                  ),
-                );
-              }).toList(),
-            ],
+            ),
           ),
         ),
       ),

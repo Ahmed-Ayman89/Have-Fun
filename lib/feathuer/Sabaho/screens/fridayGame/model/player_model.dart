@@ -26,6 +26,7 @@ class Player {
     int? position,
     int? score,
     int? skippedTurns,
+    int? previousPosition,
   }) {
     return Player(
       id: id,

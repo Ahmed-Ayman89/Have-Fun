@@ -156,96 +156,257 @@ class _DeenPageState extends State<DeenPage> {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: Scaffold(
-        backgroundColor: AppColors.primaryBackground,
-        appBar: AppBar(
-          backgroundColor: AppColors.primaryBackground,
-          elevation: 0,
-          centerTitle: true,
-          title: const Text(
-            'أسئلة دينية',
-            style: TextStyle(
-                color: AppColors.pureWhite,
-                fontWeight: FontWeight.bold,
-                fontFamily: 'Cairo'), // استخدام خط مميز
-          ),
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios, color: AppColors.pureWhite),
-            onPressed: () => Navigator.of(context).pop(),
+      child: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFF232526), Color(0xFF0f2027), Color(0xFF2c5364)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
         ),
-        body: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // --- عرض نقاط الفرق ---
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  buildTeamScoreColumn('الفريق أ', teamAScore, 'A'),
-                  buildTeamScoreColumn('الفريق ب', teamBScore, 'B'),
-                ],
-              ),
-              const SizedBox(height: 15),
-
-              // --- السبحة الإلكترونية ---
-              buildZekrCounter(),
-
-              const Divider(
-                  color: AppColors.darkBlue, thickness: 1, height: 30),
-
-              // --- قسم الأسئلة ---
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      Text(
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            centerTitle: true,
+            title: const Text(
+              'أسئلة دينية',
+              style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Cairo',
+                  fontSize: 26,
+                  letterSpacing: 0.5),
+            ),
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ),
+          body: Center(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 18),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const SizedBox(height: 18),
+                    // Religious icon/logo
+                    Container(
+                      width: 90,
+                      height: 90,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.blueAccent.withOpacity(0.18),
+                            blurRadius: 30,
+                            spreadRadius: 6,
+                          ),
+                        ],
+                      ),
+                      child: ClipOval(
+                        child: Image.asset(
+                          'assets/main_logo.jpeg',
+                          fit: BoxFit.cover,
+                          width: 80,
+                          height: 80,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 18),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        // Modern team score card
+                        Container(
+                          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 22),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.10),
+                            borderRadius: BorderRadius.circular(18),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.10),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.group, color: Colors.cyanAccent, size: 32),
+                              const SizedBox(height: 4),
+                              Text(
+                                'الفريق أ',
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                  fontFamily: 'Cairo',
+                                ),
+                              ),
+                              Text(
+                                '$teamAScore',
+                                style: const TextStyle(
+                                  fontSize: 32,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.cyanAccent,
+                                  fontFamily: 'Cairo',
+                                ),
+                              ),
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    onPressed: () => increaseTeamScore('A'),
+                                    icon: const Icon(Icons.add_circle, color: Colors.greenAccent, size: 26),
+                                  ),
+                                  IconButton(
+                                    onPressed: () => decreaseTeamScore('A'),
+                                    icon: const Icon(Icons.remove_circle, color: Colors.redAccent, size: 26),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 22),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.10),
+                            borderRadius: BorderRadius.circular(18),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.10),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.group, color: Colors.amberAccent, size: 32),
+                              const SizedBox(height: 4),
+                              Text(
+                                'الفريق ب',
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                  fontFamily: 'Cairo',
+                                ),
+                              ),
+                              Text(
+                                '$teamBScore',
+                                style: const TextStyle(
+                                  fontSize: 32,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.amberAccent,
+                                  fontFamily: 'Cairo',
+                                ),
+                              ),
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    onPressed: () => increaseTeamScore('B'),
+                                    icon: const Icon(Icons.add_circle, color: Colors.greenAccent, size: 26),
+                                  ),
+                                  IconButton(
+                                    onPressed: () => decreaseTeamScore('B'),
+                                    icon: const Icon(Icons.remove_circle, color: Colors.redAccent, size: 26),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 22),
+                    // Modern tasbeeh card
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.13),
+                        borderRadius: BorderRadius.circular(18),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.blueAccent.withOpacity(0.10),
+                            blurRadius: 16,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: buildZekrCounter(),
+                    ),
+                    const Divider(
+                        color: Colors.white24, thickness: 1, height: 30),
+                    Container(
+                      padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 12),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.13),
+                        borderRadius: BorderRadius.circular(18),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.10),
+                            blurRadius: 8,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Text(
                         deenData[currentQuestionIndex]['question'],
                         textAlign: TextAlign.center,
                         style: const TextStyle(
-                          fontSize: 22, // حجم أكبر للسؤال
+                          fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.primaryTextColor,
+                          color: Colors.white,
                           fontFamily: 'Cairo',
-                          height: 1.5, // لتباعد الأسطر
                         ),
                       ),
-                      const SizedBox(height: 25),
-                      ...deenData[currentQuestionIndex]['options']
-                          .map((option) {
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8.0),
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              minimumSize: Size(450, 50),
-                              backgroundColor: getButtonColor(option),
-                              foregroundColor: AppColors.pureWhite,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30),
-                              ),
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              elevation: 8,
-                              shadowColor:
-                                  getButtonColor(option).withOpacity(0.5),
+                    ),
+                    const SizedBox(height: 28),
+                    ...deenData[currentQuestionIndex]['options'].map((option) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 10.0),
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            minimumSize: const Size(double.infinity, 60),
+                            backgroundColor: getButtonColor(option),
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(35),
                             ),
-                            onPressed: () => checkAnswer(option),
-                            child: Text(
-                              option,
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                                fontFamily: 'Cairo',
-                              ),
+                            padding: const EdgeInsets.symmetric(vertical: 20),
+                            shadowColor: getButtonColor(option) == AppColors.darkBlue
+                                ? AppColors.glowBlue.withOpacity(0.5)
+                                : getButtonColor(option).withOpacity(0.7),
+                            elevation: 14,
+                          ),
+                          onPressed: () => checkAnswer(option),
+                          child: Text(
+                            option,
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                              fontFamily: 'Cairo',
                             ),
                           ),
-                        );
-                      }).toList(),
-                    ],
-                  ),
+                        ),
+                      );
+                    }).toList(),
+                    const SizedBox(height: 30),
+                  ],
                 ),
               ),
-            ],
+            ),
           ),
         ),
       ),

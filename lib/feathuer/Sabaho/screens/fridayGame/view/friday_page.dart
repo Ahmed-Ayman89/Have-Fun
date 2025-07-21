@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'dart:async'; // Import for Timer
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../../../../core/utils/App_colors.dart';
 import '../data/challenge_data.dart';
 import '../model/Challenge.dart';
@@ -60,6 +61,11 @@ class _FridayPageState extends State<FridayPage> {
   @override
   void initState() {
     super.initState();
+    // Enforce landscape orientation
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
     _updatePlayerNameControllers(); // تهيئة متحكمات الأسماء
   }
 
@@ -75,6 +81,13 @@ class _FridayPageState extends State<FridayPage> {
 
   @override
   void dispose() {
+    // Restore orientation to allow all
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
     // التخلص من جميع المتحكمات والمؤقت عند إغلاق الصفحة
     for (var controller in _playerNameControllers) {
       controller.dispose();
@@ -84,78 +97,23 @@ class _FridayPageState extends State<FridayPage> {
   }
 
   // دالة لإنشاء لوحة اللعب
-  List<BoardSquare> _generateBoard() {
+  List<BoardSquare> _generateBoard(List<String> challenges) {
     List<BoardSquare> board = [];
-
-    // نجهز قائمة بجميع التحديات (أسئلة وأجوبة) من yellowCardPrompts لـ "الكروت الصفراء فقط"
-    List<Challenge> yellowCardChallenges = List.generate(
-      yellowCardPrompts.length,
-      (index) => Challenge(
-        question: yellowCardPrompts[
-            index], // الآن yellowCardPrompts هي List<String> مباشرة
-        answer: '', // yellowCardAnswers هي List<String> مباشرة
-      ),
-    )..shuffle(_random);
-
-    int yellowCardChallengeCounter =
-        0; // لمتابعة أي تحدي يتم استخدامه لكروت الأصفار
-    int allDataContentIndex = 0; // لمتابعة محتوى allData
-
-    // مواقع ثابتة للكروت الخاصة على اللوحة (لضمان وجودها)
-    final Set<int> yellowCardPositions = {3, 9, 15}; // 3 كروت صفراء
-    final Set<int> redCardPositions = {6, 12, 18}; // 3 كروت حمراء
-
-    for (int i = 0; i < 20; i++) {
-      // لوحة من 20 مربعًا (من 0 إلى 19)
-      if (redCardPositions.contains(i)) {
-        board.add(BoardSquare(type: 'redCard', content: 'كارت أحمر'));
-      } else if (yellowCardPositions.contains(i)) {
-        // مربع كارت أصفر: له محتوى ثابت وسؤال/إجابة من قائمة تحدياته
-        String? question;
-        String? answer;
-
-        if (yellowCardChallengeCounter < yellowCardChallenges.length) {
-          question = yellowCardChallenges[yellowCardChallengeCounter].question;
-          answer = yellowCardChallenges[yellowCardChallengeCounter].answer;
-          yellowCardChallengeCounter++;
-        } else {
-          // Fallback لو نفدت تحديات الكارت الأصفر
-          question = 'سؤال عام لكارت أصفر: ما هي عاصمة كذا؟';
-          answer = 'القاهرة';
-        }
-
-        board.add(BoardSquare(
-          type: 'yellowCard',
-          content: 'كارت أصفر', // يظل الكونتنت "كارت أصفر"
-          question: question,
-          answer: answer,
-        ));
-      } else {
-        // مربع عادي: له محتوى من allData، وليس له سؤال/إجابة
-        String content;
-        if (i == 0) {
-          content = 'البداية';
-        } else if (i == 19) {
-          content = 'النهاية';
-        } else {
-          // ملء المربعات العادية بمحتوى من allData (اختر قائمة فرعية عشوائية ثم عنصر عشوائي)
-          if (allDataContentIndex < allData.length) {
-            final randomInnerList = allData[_random.nextInt(allData.length)];
-            if (randomInnerList.isNotEmpty) {
-              content =
-                  randomInnerList[_random.nextInt(randomInnerList.length)];
-            } else {
-              content = 'مربع عادي'; // Fallback for empty inner lists
-            }
-            allDataContentIndex++;
-          } else {
-            content = 'مربع عادي'; // محتوى احتياطي
-          }
-        }
-        // المربعات العادية ليس لها سؤال أو إجابة (question: null, answer: null)
-        board.add(BoardSquare(
-            type: 'normal', content: content, question: null, answer: null));
+    // Use the fixed boardChallenges list for all squares
+    for (int i = 0; i < 30; i++) {
+      String question = challenges[i];
+      String type = 'normal';
+      if ([3, 9, 15, 21, 27].contains(i)) {
+        type = 'yellowCard';
+      } else if ([6, 12, 18, 24].contains(i)) {
+        type = 'redCard';
       }
+      board.add(BoardSquare(
+        type: type,
+        content: question,
+        question: question,
+        answer: '',
+      ));
     }
     return board;
   }
@@ -163,7 +121,10 @@ class _FridayPageState extends State<FridayPage> {
   // دالة لتهيئة اللعبة (عند البدء أو إعادة التشغيل)
   void _initializeGame() {
     setState(() {
-      _board = _generateBoard(); // إنشاء لوحة لعب جديدة
+      // خلط الأسئلة كل جولة
+      List<String> shuffledChallenges = List<String>.from(allChallenges);
+      shuffledChallenges.shuffle();
+      _board = _generateBoard(shuffledChallenges); // إنشاء لوحة لعب جديدة
 
       _currentDisplayedChallenge = null; // لا يوجد تحدي معروض في البداية
       _currentQuestionTextForDisplay = null; // إعادة تعيين نص السؤال المعروض
@@ -201,115 +162,182 @@ class _FridayPageState extends State<FridayPage> {
     });
   }
 
-  // دالة لرمي النرد وتحريك اللاعب
-  void _rollDiceAndMove() {
+  Future<void> _rollDiceAndMove() async {
     if (_gameEnded) {
       _gameMessage = "اللعبة انتهت! ابدأ لعبة جديدة.";
       return;
     }
-
     if (_timer == null || !_timer!.isActive) {
-      _startTimer(); // بدء المؤقت عند أول رمية
+      _startTimer();
     }
-
     Player currentPlayer = _players[_currentPlayerIndex];
-
     if (currentPlayer.skippedTurns > 0) {
       setState(() {
         _gameMessage = '${currentPlayer.name} تخطى دوره بسبب الكارت الأحمر!';
         _players[_currentPlayerIndex] = currentPlayer.copyWith(
-            skippedTurns: currentPlayer.skippedTurns - 1);
-        _currentQuestionTextForDisplay = null; // إخفاء السؤال إن كان معروضًا
+            skippedTurns: currentPlayer.skippedTurns - 1,
+            previousPosition: currentPlayer.position);
+        _currentQuestionTextForDisplay = null;
       });
       _moveToNextPlayer();
       return;
     }
-
     final int roll = _random.nextInt(6) + 1;
     setState(() {
       _diceRoll = roll;
-      activeDiceImage = 'assets/images/dice-$roll.png'; // تحديث صورة النرد
-      _currentQuestionTextForDisplay =
-          null; // إخفاء السؤال السابق عند رمي النرد
+      activeDiceImage = 'assets/images/dice-$roll.png';
+      _currentQuestionTextForDisplay = null;
     });
-
     int newPosition = currentPlayer.position + roll;
-
-    if (newPosition >= _board.length - 1) {
+    if (newPosition >= _board.length) {
       newPosition = _board.length - 1;
-      setState(() {
-        _gameEnded = true;
-        _players[_currentPlayerIndex] =
-            currentPlayer.copyWith(position: newPosition);
-        _gameMessage =
-            '${_players[_currentPlayerIndex].name} وصل إلى النهاية وفاز باللعبة!';
-        _winner = _players[_currentPlayerIndex]; // تعيين الفائز
-      });
-      _stopTimer(); // إيقاف المؤقت عند انتهاء اللعبة
-      _showGameEndModal(); // عرض مودال نهاية اللعبة
-      return;
-    } else {
-      setState(() {
-        _gameMessage =
-            '${currentPlayer.name} رمى $roll وتحرك إلى مربع ${newPosition + 1}.';
-        _players[_currentPlayerIndex] =
-            currentPlayer.copyWith(position: newPosition);
-      });
     }
-
+    // Save previous position
+    _players[_currentPlayerIndex] =
+        currentPlayer.copyWith(previousPosition: currentPlayer.position);
+    // Move player
+    _players[_currentPlayerIndex] = _players[_currentPlayerIndex].copyWith(
+        position: newPosition, previousPosition: currentPlayer.position);
     final landedSquare = _board[newPosition];
-    if (landedSquare.type == 'redCard') {
-      Future.delayed(const Duration(milliseconds: 800), () {
-        setState(() {
-          _gameMessage =
-              '${currentPlayer.name} هبط على كارت أحمر! سيخسر دوره القادم.';
-          _players[_currentPlayerIndex] =
-              currentPlayer.copyWith(skippedTurns: 1);
-        });
-        _moveToNextPlayer();
-      });
-    } else if (landedSquare.type == 'yellowCard' &&
-        landedSquare.question != null) {
-      // <--- مربع "كارت أصفر"
-      Future.delayed(const Duration(milliseconds: 800), () {
-        setState(() {
-          _currentDisplayedChallenge = Challenge(
-            // قم بإنشاء تحدي من بيانات المربع
-            question: landedSquare.question!,
-            answer: '', // الإجابة ستكون null هنا
-          );
-
-          _currentQuestionTextForDisplay =
-              _currentDisplayedChallenge!.question; // عرض السؤال
-          _gameMessage =
-              'تحدي لكارت أصفر لـ ${_players[_currentPlayerIndex].name}:'; // تحديث رسالة اللعبة
-          _showIndividualPlayerScoreModal =
-              true; // فتح مودال تعديل النقاط الفردي مباشرة
-        });
-      });
-    } else if (landedSquare.type == 'normal' && landedSquare.question != null) {
-      // <--- مربع عادي بسؤال
-      setState(() {
-        _currentDisplayedChallenge = Challenge(
-          // قم بإنشاء تحدي من بيانات المربع
-          question: landedSquare.question!,
-          answer: '', // الإجابة ستكون null هنا
+    // Show dialog for answer
+    bool? answeredCorrect = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: landedSquare.type == 'yellowCard'
+              ? AppColors.warningColor
+              : landedSquare.type == 'redCard'
+                  ? AppColors.dangerColor
+                  : AppColors.cardBgDark,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+          title: Text(
+            'سؤال (${newPosition + 1})',
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: AppColors.pureWhite,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'Cairo',
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                landedSquare.question ?? '',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: landedSquare.type == 'redCard'
+                      ? AppColors.pureWhite
+                      : AppColors.primaryTextColor,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Cairo',
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'عدد الإجابات المطلوبة: $roll',
+                style: const TextStyle(
+                  color: AppColors.primaryTextColor,
+                  fontSize: 16,
+                  fontFamily: 'Cairo',
+                ),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  ElevatedButton.icon(
+                    onPressed: () => Navigator.of(context).pop(true),
+                    icon: const Icon(Icons.check, color: Colors.white),
+                    label:
+                        const Text('صح', style: TextStyle(fontFamily: 'Cairo')),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.successColor,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10)),
+                    ),
+                  ),
+                  ElevatedButton.icon(
+                    onPressed: () => Navigator.of(context).pop(false),
+                    icon: const Icon(Icons.close, color: Colors.white),
+                    label: const Text('غلط',
+                        style: TextStyle(fontFamily: 'Cairo')),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.dangerColor,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10)),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         );
-        _currentQuestionTextForDisplay =
-            _currentDisplayedChallenge!.question; // عرض السؤال
-        _gameMessage =
-            'سؤال لـ ${_players[_currentPlayerIndex].name}:'; // تحديث رسالة اللعبة
-      });
-      // بعد عرض السؤال، انتظر 3 ثوانٍ ثم انتقل للاعب التالي وأخفِ السؤال
-      Future.delayed(const Duration(seconds: 3), () {
+      },
+    );
+    // Apply rules based on answer and square type
+    if (answeredCorrect == true) {
+      if (newPosition == _board.length - 1) {
         setState(() {
-          _currentQuestionTextForDisplay = null; // إخفاء السؤال
-          _gameMessage = ''; // مسح الرسالة المرتبطة بالسؤال
-          _moveToNextPlayer(); // الانتقال للاعب التالي
+          _gameEnded = true;
+          _players[_currentPlayerIndex] =
+              _players[_currentPlayerIndex].copyWith(position: newPosition);
+          _gameMessage =
+              '${_players[_currentPlayerIndex].name} وصل إلى النهاية وفاز باللعبة!';
+          _winner = _players[_currentPlayerIndex];
         });
-      });
+        _stopTimer();
+        _showGameEndModal();
+        return;
+      }
+      if (landedSquare.type == 'yellowCard') {
+        setState(() {
+          _gameMessage = 'إجابة صحيحة! العب مرة أخرى.';
+        });
+        // Play again (do not move to next player)
+        return;
+      } else if (landedSquare.type == 'redCard') {
+        int forward = newPosition + 3;
+        if (forward >= _board.length) forward = _board.length - 1;
+        _players[_currentPlayerIndex] =
+            _players[_currentPlayerIndex].copyWith(position: forward);
+        setState(() {
+          _gameMessage = 'إجابة صحيحة! تقدمت 3 خانات للأمام.';
+        });
+      } else {
+        setState(() {
+          _gameMessage = 'إجابة صحيحة!';
+        });
+      }
+      _moveToNextPlayer();
     } else {
-      // انتقال عادي إذا لم يكن كارت أحمر ولا أصفر بسؤال ولا عادي بسؤال
+      // Wrong answer
+      if (landedSquare.type == 'yellowCard') {
+        _players[_currentPlayerIndex] = _players[_currentPlayerIndex]
+            .copyWith(skippedTurns: 1, position: currentPlayer.position);
+        setState(() {
+          _gameMessage = 'إجابة خاطئة! ستحرم من الدور القادم.';
+        });
+      } else if (landedSquare.type == 'redCard') {
+        int backward = newPosition - 3;
+        if (backward < 0) backward = 0;
+        _players[_currentPlayerIndex] =
+            _players[_currentPlayerIndex].copyWith(position: backward);
+        setState(() {
+          _gameMessage = 'إجابة خاطئة! رجعت 3 خانات للخلف.';
+        });
+      } else {
+        _players[_currentPlayerIndex] = _players[_currentPlayerIndex]
+            .copyWith(position: currentPlayer.position);
+        setState(() {
+          _gameMessage = 'إجابة خاطئة! رجعت للخانة السابقة.';
+        });
+      }
       _moveToNextPlayer();
     }
   }
@@ -328,7 +356,8 @@ class _FridayPageState extends State<FridayPage> {
     setState(() {
       _players = _players.map((p) {
         if (p.id == playerId) {
-          return p.copyWith(score: p.score + points);
+          return p.copyWith(
+              score: p.score + points, previousPosition: p.position);
         }
         return p;
       }).toList();
@@ -386,50 +415,57 @@ class _FridayPageState extends State<FridayPage> {
 
   @override
   Widget build(BuildContext context) {
-    // تحديد ما إذا كان أي مودال نشطًا لتعطيل تفاعل المحتوى الرئيسي
     final bool anyModalActive = _showIndividualPlayerScoreModal ||
         (_gameEnded && _winner != null) ||
         (_currentQuestionTextForDisplay != null &&
             !_showIndividualPlayerScoreModal);
 
     return SafeArea(
+        child: Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Color(0xFF0f2027), Color(0xFF2c5364)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
       child: Scaffold(
-        backgroundColor: AppColors.primaryBackground,
+        backgroundColor: Colors.transparent,
         appBar: AppBar(
-          backgroundColor: AppColors.primaryBackground,
+          backgroundColor: Colors.transparent,
           elevation: 0,
           leading: _showPlayerSetup
               ? null
               : IconButton(
-                  icon: const Icon(Icons.arrow_back_ios,
-                      color: AppColors.primaryTextColor),
+                  icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
                   onPressed: () => setState(() {
                     _showPlayerSetup = true;
-                    _stopTimer(); // إيقاف المؤقت عند العودة لشاشة الإعداد
+                    _stopTimer();
                   }),
                 ),
           title: const Text(
             'الكورة و اللاين مان',
             style: TextStyle(
-              color: AppColors.pureWhite,
-              fontSize: 22,
+              color: Colors.white,
+              fontSize: 26,
               fontWeight: FontWeight.bold,
               fontFamily: 'Cairo',
+              letterSpacing: 0.5,
             ),
           ),
           centerTitle: true,
           actions: [
             if (!_showPlayerSetup)
               IconButton(
-                icon: const Icon(Icons.refresh,
-                    size: 28, color: AppColors.glowBlue),
+                icon:
+                    const Icon(Icons.refresh, size: 28, color: Colors.white70),
                 tooltip: 'لعبة جديدة',
                 onPressed: _initializeGame,
               ),
             if (!_showPlayerSetup && !anyModalActive)
               IconButton(
                 icon: const Icon(Icons.person_add_alt_1,
-                    size: 28, color: AppColors.pureWhite),
+                    size: 28, color: Colors.white),
                 tooltip: 'تعديل نقاط اللاعبين',
                 onPressed: _openIndividualPlayerScoreAdjustment,
               ),
@@ -441,7 +477,7 @@ class _FridayPageState extends State<FridayPage> {
                 onNumPlayersChanged: (newNum) {
                   setState(() {
                     _numPlayers = newNum;
-                    _updatePlayerNameControllers(); // تحديث المتحكمات هنا
+                    _updatePlayerNameControllers();
                   });
                 },
                 playerNameControllers: _playerNameControllers,
@@ -451,19 +487,20 @@ class _FridayPageState extends State<FridayPage> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20),
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.all(16),
-                      margin: const EdgeInsets.only(bottom: 24),
+                      padding: const EdgeInsets.all(18),
+                      margin: const EdgeInsets.only(bottom: 32),
                       decoration: BoxDecoration(
-                        color: AppColors.secondaryBackground,
-                        borderRadius: BorderRadius.circular(10),
+                        color: Colors.white.withOpacity(0.08),
+                        borderRadius: BorderRadius.circular(18),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.3),
-                            blurRadius: 8,
+                            color: Colors.black.withOpacity(0.18),
+                            blurRadius: 16,
                             offset: const Offset(0, 4),
                           ),
                         ],
@@ -475,8 +512,8 @@ class _FridayPageState extends State<FridayPage> {
                                 ? 'الدور على: ${_players[_currentPlayerIndex].name}'
                                 : 'جارٍ التهيئة...',
                             style: const TextStyle(
-                              color: AppColors.pureWhite,
-                              fontSize: 20,
+                              color: Colors.white,
+                              fontSize: 22,
                               fontWeight: FontWeight.bold,
                               fontFamily: 'Cairo',
                             ),
@@ -484,71 +521,72 @@ class _FridayPageState extends State<FridayPage> {
                           ),
                           const SizedBox(height: 10),
                           Wrap(
-                            spacing: 10,
-                            runSpacing: 10,
+                            spacing: 14,
+                            runSpacing: 14,
                             alignment: WrapAlignment.center,
                             children: _players
                                 .map((p) => Container(
                                       padding: const EdgeInsets.symmetric(
-                                          vertical: 6, horizontal: 12),
+                                          vertical: 10, horizontal: 18),
                                       decoration: BoxDecoration(
-                                        color: AppColors.cardBgLight,
+                                        color: Colors.white.withOpacity(0.13),
                                         borderRadius: BorderRadius.circular(20),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color:
+                                                Colors.black.withOpacity(0.10),
+                                            blurRadius: 8,
+                                            offset: const Offset(0, 4),
+                                          ),
+                                        ],
                                       ),
                                       child: Column(
-                                        // استخدم Column لعرض الاسم والنقاط والأزرار عموديًا
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
                                           Row(
-                                            // الصف الأيقونة والاسم والنقاط
                                             mainAxisSize: MainAxisSize.min,
                                             children: [
-                                              p.icon, // عرض الأيقونة (الصورة)
+                                              p.icon,
                                               const SizedBox(width: 8),
                                               Text(
-                                                '${p.name}: ${p.score} نقطة', // عرض نقاط اللاعب الفردية
+                                                '${p.name}: ${p.score} نقطة',
                                                 style: const TextStyle(
-                                                  color: AppColors
-                                                      .primaryTextColor,
-                                                  fontSize: 16,
+                                                  color: Colors.white,
+                                                  fontSize: 18,
                                                   fontFamily: 'Cairo',
                                                 ),
                                               ),
                                             ],
                                           ),
-                                          const SizedBox(
-                                              height:
-                                                  4), // مسافة بين النص والأزرار
+                                          const SizedBox(height: 4),
                                           Row(
-                                            // أزرار الزيادة والنقصان
-                                            mainAxisSize: MainAxisSize
-                                                .min, // Changed to min
+                                            mainAxisSize: MainAxisSize.min,
                                             children: [
                                               IconButton(
                                                 icon: const Icon(
                                                     Icons.remove_circle,
                                                     color:
                                                         AppColors.dangerColor,
-                                                    size: 24),
+                                                    size: 26),
                                                 onPressed: anyModalActive
                                                     ? null
                                                     : () => _adjustPlayerScore(
                                                         p.id, -1),
                                                 tooltip: 'خصم نقطة',
-                                                splashRadius: 20,
+                                                splashRadius: 22,
                                               ),
                                               IconButton(
                                                 icon: const Icon(
                                                     Icons.add_circle,
                                                     color:
                                                         AppColors.successColor,
-                                                    size: 24),
+                                                    size: 26),
                                                 onPressed: anyModalActive
                                                     ? null
                                                     : () => _adjustPlayerScore(
                                                         p.id, 1),
                                                 tooltip: 'إضافة نقطة',
-                                                splashRadius: 20,
+                                                splashRadius: 22,
                                               ),
                                             ],
                                           ),
@@ -557,29 +595,25 @@ class _FridayPageState extends State<FridayPage> {
                                     ))
                                 .toList(),
                           ),
-                          const SizedBox(height: 15),
+                          const SizedBox(height: 18),
                           Text(
                             _gameMessage,
                             textAlign: TextAlign.center,
                             style: const TextStyle(
-                              color: AppColors.primaryTextColor,
-                              fontSize: 18,
+                              color: Colors.white,
+                              fontSize: 20,
                               fontFamily: 'Cairo',
                             ),
                           ),
                         ],
                       ),
                     ),
-
                     BoardGridWidget(
-                      // لوحة اللعب الشبكية
                       board: _board,
                       players: _players,
                       currentPlayerIndex: _currentPlayerIndex,
                     ),
-                    const SizedBox(height: 30),
-
-                    // <--- عرض السؤال هنا إذا كان موجودًا
+                    const SizedBox(height: 36),
                     if (_currentQuestionTextForDisplay != null)
                       Padding(
                         padding: const EdgeInsets.only(bottom: 20.0),
@@ -587,20 +621,16 @@ class _FridayPageState extends State<FridayPage> {
                           _currentQuestionTextForDisplay!,
                           textAlign: TextAlign.center,
                           style: const TextStyle(
-                            color: AppColors.warningColor, // لون مميز للسؤال
-                            fontSize: 24,
+                            color: AppColors.warningColor,
+                            fontSize: 26,
                             fontWeight: FontWeight.bold,
                             fontFamily: 'Cairo',
                           ),
                         ),
                       ),
-                    // نهاية الجزء الجديد لعرض السؤال
-
                     DiceRollSection(
-                      // قسم النرد
                       diceRoll: _diceRoll,
-                      activeDiceImage:
-                          'assets/images/dice-$_diceRoll.png', // استخدام الصورة هنا
+                      activeDiceImage: 'assets/images/dice-$_diceRoll.png',
                       onRollDice: _rollDiceAndMove,
                       isDisabled: anyModalActive,
                     ),
@@ -650,6 +680,6 @@ class _FridayPageState extends State<FridayPage> {
               )
             : null,
       ),
-    );
+    ));
   }
 }
